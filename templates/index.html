@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>    
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="description" content="This is Joe Finan's Band App for the Category project in the Full Stack Developer NanoDegree.">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">    
+        <title>Joe Finan Band Catalog</title>
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,300,700">
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Chicle">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+       
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        
+        <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="http://apis.google.com/js/client:platform.js?onload=start" async defer></script>
+        <!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+	</head>
+	<body>
+        <div class="container-fluid">
+            <header class="banner">
+                <div class="row">
+                    <span class="">
+                        <span class="appTitle">Joe Finan's Band Catalog</span>
+                    </span>
+                    <!-- GOOGLE PLUS SIGN IN-->
+                    <span class="signInButton" style="display:{% if not loggedInUser %}block{% else %}none{% endif %};">
+                        <span class="g-signin"
+                            data-scope="openid email"
+                            data-clientid="488368837284-pg2h5lnrhumeh3l0ajl57odaokm39she.apps.googleusercontent.com"
+                            data-redirecturi="postmessage"
+                            data-accesstype="offline"
+                            data-cookiepolicy="single_host_origin"
+                            data-callback="signInCallback"
+                            data-approvalprompt="force">
+                        </span>
+                    </span>
+                    <span class="signOutButton" style="text-align: right; display:{% if loggedInUser %}block{% else %}none{% endif %};">
+                        <span class="userName">{{loggedInUser.name}}</span>
+                        <img src="{{loggedInUser.picture}}" style = "width: 45px; height: 45px; border-radius: 5px;">
+                        <a href="{{url_for('gdisconnect')}}">
+                            <!--<button type="button" class="btn btn-default delete"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>Log Out</button>-->
+                            <img src="{{ url_for('static', filename='signOut.png') }}" style = "width: 125px; height: 45px; border-radius: 5px;">
+                        </a>
+                    </span>
+                </div>
+                <div id="result"></div>
+            </header>
+            
+            <div class = 'flash'>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul>
+                        {% for message in messages %}
+                            <li> <strong> {{ message }} </strong> </li>
+                        {% endfor %}
+                        </ul>
+                        {% endif %}
+                {% endwith %}
+            </div>
+            
+            {% block pageContent %}
+			{% endblock %}
+        </div>
+        
+        <script>
+        function signInCallback(authResult){
+            if(authResult['code']){
+                // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main bands page
+                $.ajax({
+                    type: 'POST',
+                    url: '/gconnect?',
+                    processData: false,
+                    data: authResult['code'],
+                    contentType: 'application/octet-stream; charset=utf-8',
+                    success: function(result) {
+                        // Handle or verify the server response if necessary.
+                        if (result) {
+                            window.location.href = window.location.href;
+                        } else if (authResult['error']) {
+                            console.log('There was an error: ' + authResult['error']);
+                        } else {
+                            $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+                        }
+                    },
+                    error : function(jqXHR, textStatus, errorThrown){
+                        if(jqXHR.status == 404 || errorThrown == 'Not Found') {
+                            console.log('There was a 404 error calling google api!');
+                            $('#result').html('There was a 404 error calling google api!');
+                        }else if(jqXHR.status == 401) {
+                            console.log(textStatus);
+                            console.log(errorThrown);
+                            $('#result').html('There was a 401 error calling google api: '+errorThrown);
+                        }else{
+                            $('#result').html('Unknown Exception!');
+                        }
+                    }
+                });
+            }else{
+                console.log('awe shit!');
+            }
+        }
+    </script>
+	</body>
+</html>

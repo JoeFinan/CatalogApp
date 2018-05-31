@@ -1,0 +1,84 @@
+{% extends "index.html" %}
+{% block pageContent %}
+    <nav>
+        {% if loggedInUser.user_admin %}
+        <span class="navMenuItems">Users</span><a href="{{url_for('showUsers')}}"><span title="User Admin" class="glyphicon glyphicon-user navMenuIcons" aria-hidden="true"></span></a></br>
+        {% endif %}
+        <span class="navMenuItems">Bands</span>{% if loggedInUser %}<a href="{{url_for('newBand')}}"><span title="New Band" class="glyphicon glyphicon-plus-sign navMenuIcons" aria-hidden="true"></span></a>{% endif %}
+        <ul>
+            {% for band in allBands %}
+            <li><a href="{{url_for('showSongs', band_id = band.id)}}">{{band.name}}</a>
+                {% if band.user_id == loggedInUser.id %}
+                   <a href="{{url_for('deleteBand', band_id = band.id)}}"><span title="Delete Band" class="glyphicon glyphicon-minus-sign delete navMenuIcons" aria-hidden="true"></span></a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+    
+    <main> 
+        <!-- crumb trail -->
+        <div class="bc" aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            {% if selectedBand %}
+                <li class="breadcrumb-item"><a href="{{url_for('showBands')}}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{selectedBand.name}}</li>
+            {% else %}
+                <li class="breadcrumb-item active" aria-current="page">Home</li>
+            {% endif %}
+          </ol>
+        </div>
+        
+        <!-- main conent -->
+        {% if selectedBand %}
+            <h2>{{selectedBand.name}}
+                <small>({{songs|length}} songs) 
+                    {% if selectedBand.user_id == loggedInUser.id %}
+                        <a href="{{url_for('newSong', band_id = selectedBand.id)}}"><span title="Add Song" class="glyphicon glyphicon-music" aria-hidden="true"></span></a>
+                        {% endif %}
+                </small>
+            </h2>
+            
+            <div id="accordion">
+              {% for song in songs %}
+              <div class="card">
+                <div class="card-header" id="heading{{song.id}}">
+                  <h5 class="mb-0">
+                    <!--<span class="badge badge-pill badge-info" data-toggle="collapse" data-target="#collapse{{song.id}}" aria-expanded="true" aria-controls="collapse{{song.id}}">{{song.title}}</span>-->
+                    <span class="badge" data-toggle="collapse" data-target="#collapse{{song.id}}" aria-expanded="true" aria-controls="collapse{{song.id}}">
+                        {{song.title}} 
+                        {% if selectedBand.user_id == loggedInUser.id %}
+                            <a href="{{url_for('editSong', band_id = selectedBand.id, song_id = song.id)}}"><span title="Edit Song" class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                            <a class="delete" href="{{url_for('deleteSong', song_id = song.id)}}"><span title="Delete Song" class="glyphicon glyphicon-minus-sign delete" aria-hidden="true"></span></a>
+                        {% endif %}
+                    </span>
+                  </h5>
+                </div>
+                <div id="collapse{{song.id}}" class="collapse show" aria-labelledby="heading{{song.id}}" data-parent="#accordion">
+                  <div class="card-body">
+                    {{song.description}}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+        {% else %}
+            <h3>Select a band on the left to see a list of songs...</h3>
+        {% endif %}
+    </main>
+    
+    <!--<main>                
+        <a href="{{url_for('showBands')}}"><h3>Home</h3></a>
+        {% if band %}
+            <h1>{{band.name}} Songs <a href="{{url_for('newSong', band_id = band.id)}}"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></a></h1>
+            {% for song in songs %}
+            <article>
+               <h2>{{song.title}}   <a href="{{url_for('editSong', band_id = band.id, song_id = song.id)}}"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a> | 
+                <a href="{{url_for('deleteSong', song_id = song.id)}}"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span></a></h2>
+               <p>{{song.description}}</p>
+            </article>
+            {% endfor %}
+        {% else %}
+            <h3>Select a band on the left to see a list of their songs...</h3>
+        {% endif %}
+    </main>-->
+{% endblock %}

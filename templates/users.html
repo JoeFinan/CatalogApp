@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+{% block pageContent %}
+    <nav>
+         <span class="navMenuItems">Users</span>
+        <ul>
+            {% for user in allUsers %}
+                <li><a href="{{url_for('showUser', user_id = user.id)}}">{{user.name}}</a>
+                <a href="{{url_for('deleteUser', user_id = user.id)}}"><span class="glyphicon glyphicon-minus-sign delete" aria-hidden="true"></span></a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    <main> 
+        <!-- crumb trail -->
+        <div class="bc" aria-label="breadcrumb">
+          <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{url_for('showBands')}}">Band App Home</a></li>
+            {% if selectedUser %}
+                <li class="breadcrumb-item"><a href="{{url_for('showUsers')}}">User Admin Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{selectedUser.name}}</li>
+            {% else %}
+                <li class="breadcrumb-item active" aria-current="page">User Admin Home</li>
+            {% endif %}
+          </ol>
+        </div>
+        
+        <!-- main conent -->
+        {% if selectedUser %}
+            <span class="myFormLabel">Name:</span>{{selectedUser.name}}</br>
+            <span class="myFormLabel">Email:</span>{{selectedUser.email}}</br>
+            <span class="myFormLabel">User Admin:</span>
+                {{selectedUser.user_admin}} 
+                {% if selectedUser.user_admin %}
+                    <a href="{{url_for('delAdminPermissions', user_id = selectedUser.id)}}"><span title="Remove Admin Permissions" class="glyphicon glyphicon-remove-circle delete" aria-hidden="true"></span></a>
+                {% else %}
+                    <a href="{{url_for('addAdminPermissions', user_id = selectedUser.id)}}"><span style="color:darkgreen;" title="Add Admin Permissions" class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></a>
+                {% endif %}
+                </br>
+            <span class="myFormLabel">Picture:</span><img src="{{selectedUser.picture}}" style = "border-radius: 5px;">
+        {% else %}
+            <h3>Select a user on the left to see user details...</h3>
+        {% endif %}
+    </main>
+{% endblock %}
